@@ -1,0 +1,19 @@
+# Local development only. In production Clawnify injects the Fatture in Cloud
+# connection via the in-process CREDENTIALS binding — none of this is needed once
+# deployed. With NOTHING set, the app runs in preview mode (sample data).
+
+# ── Recommended: one org token ───────────────────────────────────────────────
+# With just this set, @clawnify/connections resolves your REAL org connections
+# (Fatture in Cloud, …) over HTTP — no per-service token below needed. Grab it
+# from the Clawnify dashboard. The org is derived from the token server-side.
+# CLAWNIFY_TOKEN=clw_...
+
+# ── OR: a bare Fatture in Cloud access token (fallback when CLAWNIFY_TOKEN unset) ─
+# OAuth2 access token for your Fatture in Cloud account. Get one from the API
+# reference "Authorize" flow: https://developers.fattureincloud.it/api-reference/
+# FATTUREINCLOUD_BEARER_TOKEN=your_fattureincloud_access_token
+
+# ── Optional: pin the company (azienda) ──────────────────────────────────────
+# Fatture in Cloud accounts can hold several companies. Leave unset to use the
+# first one; set this to read a specific azienda (its numeric id from /user/companies).
+# FATTUREINCLOUD_COMPANY_ID=123456

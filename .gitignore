@@ -1,0 +1,12 @@
+node_modules
+dist
+.wrangler
+.clawnify
+.env*
+!.env.example
+.dev.vars
+
+# Internal design system — copied in for the builder/agent to follow, never published.
+DESIGN.md
+
+.DS_Store
