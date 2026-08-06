@@ -2,6 +2,8 @@
 
 # Open Fatturazione Elettronica
 
+[![Deploy with Clawnify](https://app.clawnify.com/deploy-button.svg)](https://app.clawnify.com/deploy?repo=clawnify/open-fatturazione-elettronica)
+
 An open-source **Italian e-invoicing cockpit** for your [Fatture in Cloud](https://www.fattureincloud.it/) account — a free, self-hostable alternative view over your invoices. Lists issued invoices, shows what's still **da incassare**, and flags every **fattura scaduta**, then exposes it all as a clean JSON API so a [Clawnify](https://clawnify.com) agent can chase late payers and reconcile payments for you.
 
 It **rides Fatture in Cloud's SdI-accredited pipeline** — Fatture in Cloud creates and transmits the electronic invoice to the *Sistema di Interscambio*. This app only reads and orchestrates on top of it; it never touches the regulated FatturaPA/SdI transmission itself.
