@@ -6,7 +6,7 @@ import api from "./routes";
 // `env` (the CREDENTIALS broker binding + injected secrets), so there's no
 // credential bootstrapping middleware to run here.
 const app = createApp<{ Bindings: Bindings }>({
-  title: "Open Fatturazione Elettronica",
+  title: "OpenFatturazioneElettronica",
   version: "1.0.0",
   description:
     "Italian electronic-invoicing cockpit on top of Fatture in Cloud — invoices, outstanding amounts, and overdue payments as a JSON API.",
