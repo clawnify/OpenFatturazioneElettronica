@@ -1,6 +1,6 @@
 <!-- Banner: run the `readme-banner` skill once there's a deployed screenshot, then drop the image here (above the H1). -->
 
-# Open Fatturazione Elettronica
+# OpenFatturazioneElettronica
 
 [![Deploy with Clawnify](https://app.clawnify.com/deploy-button.svg)](https://app.clawnify.com/deploy?repo=clawnify/open-fatturazione-elettronica)
 

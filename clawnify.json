@@ -1,7 +1,7 @@
 {
   "$schema": "https://app.clawnify.com/schema/v1/clawnify.json",
   "version": 1,
-  "name": "Open Fatturazione Elettronica",
+  "name": "OpenFatturazioneElettronica",
   "icon": "icon.svg",
   "description": "Italian electronic-invoicing cockpit on top of your Fatture in Cloud account. Lists issued invoices, surfaces what's still outstanding, and flags every overdue payment — then exposes it all as a clean JSON API so a Clawnify agent can chase late payers, reconcile incassi, and issue invoices for you. Rides Fatture in Cloud's SdI-accredited pipeline; never touches the regulated transmission itself.",
   "app": {
