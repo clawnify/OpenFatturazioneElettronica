@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { embedded } from "@clawnify/app/client";
 import { AlertTriangle, CheckCircle2, ExternalLink, FileText, RefreshCw } from "lucide-react";
 
 // ── Types (mirror src/server/types.ts) ────────────────────────────────────────
@@ -113,7 +114,11 @@ export function App() {
             {report?.company && <p className="text-xs text-muted">{report.company}</p>}
           </div>
         </div>
-        {report?.preview ? (
+        {report?.preview && embedded ? (
+          // Inside the Clawnify workspace the frame cannot open the dashboard;
+          // Integrations is already in the sidebar next to this app.
+          <span className="text-xs text-muted">Collega Fatture in Cloud da Integrations</span>
+        ) : report?.preview ? (
           <a
             href={DASHBOARD_INTEGRATIONS}
             className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-primary px-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-hover"

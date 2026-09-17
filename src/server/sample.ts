@@ -1,65 +1,91 @@
 // Preview data. Rendered when Fatture in Cloud isn't connected yet, so the
 // dashboard shows a realistic, fully-laid-out shell instead of an empty state.
 // Every consumer treats `preview: true` as "not real numbers".
+//
+// Dates are relative to today, so "overdue" and "billed in the last 30 days"
+// stay true whenever the preview is opened. Customers are fictional.
 
 import type { Invoice, InvoicesReport, Totals } from "./types";
 
-const SAMPLE_INVOICES: Invoice[] = [
-  {
-    id: 4,
-    number: "128/2025",
-    date: "2025-11-18",
-    customer: "Meridiana S.r.l.",
-    amountNet: 3200, amountVat: 704, amountGross: 3904,
-    payments: [{ dueDate: "2025-12-18", amount: 3904, status: "not_paid", paidDate: null }],
-    outstanding: 3904, overdueAmount: 3904, daysOverdue: 47,
-  },
-  {
-    id: 3,
-    number: "127/2025",
-    date: "2025-11-05",
-    customer: "Studio Bianchi",
-    amountNet: 1500, amountVat: 330, amountGross: 1830,
-    payments: [{ dueDate: "2025-12-05", amount: 1830, status: "not_paid", paidDate: null }],
-    outstanding: 1830, overdueAmount: 1830, daysOverdue: 60,
-  },
-  {
-    id: 2,
-    number: "126/2025",
-    date: "2026-01-12",
-    customer: "Officina Rossi & C.",
-    amountNet: 890, amountVat: 195.8, amountGross: 1085.8,
-    payments: [{ dueDate: "2026-02-11", amount: 1085.8, status: "not_paid", paidDate: null }],
-    outstanding: 1085.8, overdueAmount: 0, daysOverdue: null,
-  },
-  {
-    id: 1,
-    number: "125/2025",
-    date: "2025-10-28",
-    customer: "Vignaflora di F. Saponari",
-    amountNet: 2400, amountVat: 528, amountGross: 2928,
-    payments: [{ dueDate: "2025-11-27", amount: 2928, status: "paid", paidDate: "2025-11-24" }],
-    outstanding: 0, overdueAmount: 0, daysOverdue: null,
-  },
+const DAY = 86_400_000;
+
+interface SampleSpec {
+  customer: string;
+  amountNet: number;
+  /** Days before today the invoice was issued. */
+  issuedAgo: number;
+  /** Payment terms in days. */
+  terms: number;
+  /** Days before today it was paid, or null while unpaid. */
+  paidAgo: number | null;
+}
+
+// Oldest first, so numbering follows issue date.
+const SPECS: SampleSpec[] = [
+  { customer: "Vignaflora Società Agricola", amountNet: 2400, issuedAgo: 110, terms: 30, paidAgo: 83 },
+  { customer: "Studio Esempio Associati", amountNet: 1500, issuedAgo: 90, terms: 30, paidAgo: null },
+  { customer: "Nordluce S.r.l.", amountNet: 3200, issuedAgo: 77, terms: 30, paidAgo: null },
+  { customer: "Officina Ventura & C.", amountNet: 890, issuedAgo: 12, terms: 30, paidAgo: null },
 ];
 
-function totalsOf(invoices: Invoice[]): Totals {
+const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+const cents = (n: number) => Math.round(n * 100) / 100;
+
+function sampleInvoices(now: number): Invoice[] {
+  const perYear = new Map<string, number>();
+  return SPECS.map((spec, index): Invoice => {
+    const issued = now - spec.issuedAgo * DAY;
+    const due = issued + spec.terms * DAY;
+    const year = isoDay(issued).slice(0, 4);
+    const sequence = (perYear.get(year) ?? 0) + 1;
+    perYear.set(year, sequence);
+
+    const amountVat = cents(spec.amountNet * 0.22);
+    const amountGross = cents(spec.amountNet + amountVat);
+    const paid = spec.paidAgo !== null;
+    const overdue = !paid && due < now;
+    return {
+      id: index + 1,
+      number: `${sequence}/${year}`,
+      date: isoDay(issued),
+      customer: spec.customer,
+      amountNet: spec.amountNet,
+      amountVat,
+      amountGross,
+      payments: [{
+        dueDate: isoDay(due),
+        amount: amountGross,
+        status: paid ? "paid" : "not_paid",
+        paidDate: paid ? isoDay(now - spec.paidAgo! * DAY) : null,
+      }],
+      outstanding: paid ? 0 : amountGross,
+      overdueAmount: overdue ? amountGross : 0,
+      daysOverdue: overdue ? Math.floor((now - due) / DAY) : null,
+    };
+  }).reverse(); // newest first, like the live list
+}
+
+function totalsOf(invoices: Invoice[], now: number): Totals {
+  const cutoff = now - 30 * DAY;
   return {
     currency: "EUR",
     count: invoices.length,
-    outstanding: invoices.reduce((s, i) => s + i.outstanding, 0),
-    overdue: invoices.reduce((s, i) => s + i.overdueAmount, 0),
+    outstanding: cents(invoices.reduce((s, i) => s + i.outstanding, 0)),
+    overdue: cents(invoices.reduce((s, i) => s + i.overdueAmount, 0)),
     overdueCount: invoices.filter((i) => i.daysOverdue !== null).length,
-    billedLast30: 1085.8,
+    billedLast30: cents(invoices
+      .filter((i) => new Date(`${i.date}T00:00:00Z`).getTime() >= cutoff)
+      .reduce((s, i) => s + i.amountGross, 0)),
   };
 }
 
-export function sampleReport(): InvoicesReport {
+export function sampleReport(now = Date.now()): InvoicesReport {
+  const invoices = sampleInvoices(now);
   return {
     preview: true,
     company: "La tua azienda",
-    invoices: SAMPLE_INVOICES,
-    totals: totalsOf(SAMPLE_INVOICES),
-    generatedAt: new Date().toISOString(),
+    invoices,
+    totals: totalsOf(invoices, now),
+    generatedAt: new Date(now).toISOString(),
   };
 }
